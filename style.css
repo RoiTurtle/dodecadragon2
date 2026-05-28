@@ -1,0 +1,160 @@
+/* Striped dark background matching image_d648b2.jpg */
+body {
+    background-color: #1a1a1a;
+    background-image: repeating-linear-gradient(45deg, #151515, #151515 10px, #202020 10px, #202020 20px);
+    color: #000000;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* Top Menu Buttons */
+.top-nav {
+    padding: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.nav-btn {
+    background-color: #cccccc;
+    border: 2px solid #ffffff;
+    border-right-color: #777777;
+    border-bottom-color: #777777;
+    padding: 3px 10px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Sidebar Resource Panel */
+.sidebar-panel {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    width: 180px;
+    background-color: #cccccc;
+    border: 2px solid #ffffff;
+    border-right-color: #555555;
+    border-bottom-color: #555555;
+}
+
+.panel-header {
+    background-color: #28b428;
+    color: white;
+    padding: 2px 5px;
+    font-weight: bold;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-btn {
+    background: #cccccc;
+    border: 1px solid white;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 0 3px;
+}
+
+.panel-content {
+    padding: 10px;
+    font-size: 13px;
+}
+
+/* Main UI Window centered */
+.window-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    background-color: #cccccc;
+    border: 2px solid #ffffff;
+    border-right-color: #555555;
+    border-bottom-color: #555555;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+}
+
+.window-header {
+    background-color: #28b428;
+    color: white;
+    font-weight: bold;
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+.window-body {
+    padding: 20px;
+    text-align: center;
+}
+
+.window-body h2 {
+    margin: 0 0 5px 0;
+    font-size: 22px;
+}
+
+#gold-stats {
+margin: 0 0 20px 0;
+font-size: 12px;
+color: #444444;
+}
+
+/* Retro Buttons Layout */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+.game-btn {
+    background-color: #cccccc;
+    border: 2px solid #ffffff;
+    border-right-color: #555555;
+    border-bottom-color: #555555;
+    color: black;
+    padding: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+}
+
+.game-btn:active:not(:disabled) {
+    border: 2px solid #555555;
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
+}
+
+.game-btn:disabled {
+    color: #777777;
+    cursor: not-allowed;
+}
+
+.main-action {
+    padding: 6px 15px;
+    font-size: 14px;
+}
+
+.upgrade-row {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+    justify-content: center;
+}
+
+.upgrade-btn {
+    width: 140px;
+    height: 45px;
+}
+
+.max-btn {
+    width: 45px;
+    height: 45px;
+}
+
+.full-width {
+    width: 190px;
+}
