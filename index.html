@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DodecaDragons 2</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#111;color:#ccc;font-family:'Courier New',monospace;font-size:11px;overflow-x:hidden}
+a{color:#aaf;text-decoration:none}
+
+/* ── TOP NAV ── */
+#topnav{background:#222;border-bottom:1px solid #444;padding:2px 6px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:100}
+#topnav button{background:#333;border:1px solid #555;color:#ccc;padding:1px 6px;cursor:pointer;font-size:10px}
+#topnav button:hover{background:#444}
+#topnav .sep{color:#555;margin:0 2px}
+#gold-display{color:#ffd700;font-weight:bold;font-size:11px;margin-left:auto}
+
+/* ── MAIN LAYOUT ── */
+#game{display:flex;flex-wrap:wrap;gap:3px;padding:4px;align-items:flex-start}
+
+/* ── PANELS ── */
+.panel{border:1px solid #444;background:#1a1a1a;min-width:180px;max-width:320px;flex:1 1 auto}
+.panel-wide{min-width:280px;max-width:420px}
+.panel-narrow{min-width:140px;max-width:210px}
+.panel-header{padding:2px 5px;font-size:10px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+.panel-header .res-amount{font-size:10px;font-weight:normal}
+.panel-body{padding:3px 4px}
+.panel-collapsed .panel-body{display:none}
+
+/* Panel color themes */
+.ph-gold{background:#3a2f00;color:#ffd700;border-color:#665500}
+.ph-magic{background:#2a1a3a;color:#cc99ff;border-color:#553388}
+.ph-void{background:#1a0a2a;color:#9966cc;border-color:#442266}
+.ph-dark{background:#0d0d1a;color:#8855cc;border-color:#330066}
+.ph-fire{background:#2a0f00;color:#ff6622;border-color:#882200}
+.ph-holy{background:#2a2200;color:#ffdd44;border-color:#665500}
+.ph-blue{background:#001a2a;color:#44aaff;border-color:#004466}
+.ph-green{background:#001a00;color:#44cc44;border-color:#226622}
+.ph-plague{background:#001a00;color:#55ee55;border-color:#007700}
+.ph-teal{background:#001a14;color:#44ffcc;border-color:#006644}
+.ph-alchemy{background:#1a1500;color:#ffcc44;border-color:#664400}
+.ph-cyan{background:#001818;color:#44ffee;border-color:#006655}
+.ph-blue2{background:#000e1a;color:#44aaff;border-color:#002244}
+.ph-indigo{background:#0a0018;color:#8866ff;border-color:#330066}
+.ph-violet{background:#120018;color:#cc44ff;border-color:#550077}
+.ph-pink{background:#1a0010;color:#ff66cc;border-color:#660033}
+.ph-death{background:#0d0d0d;color:#888888;border-color:#333333}
+.ph-red{background:#1a0000;color:#ff4444;border-color:#660000}
+.ph-orange{background:#1a0800;color:#ff8822;border-color:#663300}
+.ph-yellow{background:#1a1200;color:#ffdd00;border-color:#665500}
+.ph-finality{background:#1a001a;color:#ff44ff;border-color:#660066}
+.ph-challenge{background:#1a0a1a;color:#ff88ff;border-color:#551155}
+.ph-light{background:#1a1a10;color:#ffffaa;border-color:#555522}
+
+/* ── UPGRADE ROWS ── */
+.upg-row{display:flex;align-items:center;gap:3px;padding:1px 2px;border-bottom:1px solid #2a2a2a;min-height:18px}
+.upg-row:last-child{border-bottom:none}
+.upg-row:hover{background:#222}
+.upg-desc{flex:1;color:#aaa;font-size:10px;line-height:1.2}
+.upg-desc .bold{color:#ddd;font-weight:bold}
+.upg-cost{color:#888;font-size:9px;white-space:nowrap}
+.upg-row.bought{opacity:0.45}
+.upg-row.bought .upg-desc{color:#666}
+
+/* ── BUTTONS ── */
+.btn{background:#2a2a2a;border:1px solid #444;color:#bbb;padding:1px 5px;cursor:pointer;font-size:9px;white-space:nowrap;font-family:inherit}
+.btn:hover:not(:disabled){background:#383838;color:#fff}
+.btn:disabled{opacity:0.35;cursor:default}
+.btn-gold{border-color:#665500;color:#ffd700}
+.btn-gold:hover:not(:disabled){background:#332200}
+.btn-magic{border-color:#553388;color:#cc99ff}
+.btn-fire{border-color:#882200;color:#ff6622}
+.btn-holy{border-color:#665500;color:#ffdd44}
+.btn-blue{border-color:#004466;color:#44aaff}
+.btn-green{border-color:#226622;color:#44cc44}
+.btn-cyan{border-color:#006655;color:#44ffee}
+.btn-violet{border-color:#550077;color:#cc44ff}
+.btn-red{border-color:#660000;color:#ff4444}
+.btn-indigo{border-color:#330066;color:#8866ff}
+.btn-pink{border-color:#660033;color:#ff66cc}
+.btn-finality{border-color:#660066;color:#ff44ff}
+.btn-auto{font-size:8px;padding:0px 3px;border-color:#333}
+.btn-auto.on{border-color:#226622;color:#44cc44}
+
+/* ── RESOURCE LINE ── */
+.res-line{padding:2px 4px;font-size:10px;color:#bbb;border-bottom:1px solid #222}
+.res-value{color:#fff;font-weight:bold}
+.res-rate{color:#777;font-size:9px}
+
+/* ── SIGIL PANELS ── */
+.sigil-panel{display:flex;gap:3px;padding:3px}
+.sigil-icon{width:28px;height:28px;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:16px;opacity:0.7;flex-shrink:0}
+.sigil-info{flex:1}
+.sigil-name{font-weight:bold;font-size:10px}
+.sigil-desc{font-size:9px;color:#888;line-height:1.3}
+
+/* ── CHALLENGES ── */
+.challenge-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px}
+.chal-box{border:1px solid #444;padding:4px;text-align:center;cursor:pointer}
+.chal-box:hover{background:#222}
+.chal-box .chal-label{font-size:16px;font-weight:bold}
+.chal-box .chal-sub{font-size:9px;color:#888}
+
+/* ── DRAGON ── */
+#dragon-panel .dragon-area{padding:4px;text-align:center}
+.dragon-sprite{font-size:40px;line-height:1;display:block;margin:2px auto}
+.dragon-name{color:#cc99ff;font-weight:bold;font-size:11px}
+.dragon-desc{font-size:9px;color:#888;margin:3px 0}
+
+/* ── KNOWLEDGE ── */
+.know-trade{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;padding:3px}
+.know-box{border:1px solid #333;padding:3px;font-size:9px;text-align:center}
+.know-box .kl{color:#777;font-size:8px}
+.know-box .kv{color:#ffcc44;font-size:10px;font-weight:bold}
+
+/* ── MISC ── */
+.small{font-size:9px;color:#777}
+.section-label{font-size:9px;color:#666;padding:2px 4px;background:#161616;border-bottom:1px solid #222}
+.inline-note{font-size:9px;color:#888;padding:2px 4px}
+.highlight{color:#fff;font-weight:bold}
+
+/* ── SCROLLABLE TALL PANELS ── */
+.panel-scroll{max-height:260px;overflow-y:auto}
+.panel-scroll::-webkit-scrollbar{width:4px}
+.panel-scroll::-webkit-scrollbar-thumb{background:#333}
+
+/* ── NOTIFICATION ── */
+#notif{position:fixed;bottom:8px;right:8px;background:#333;border:1px solid #555;padding:4px 8px;font-size:10px;z-index:200;opacity:0;transition:opacity 0.3s}
+#notif.show{opacity:1}
+
+/* ── FINALITY CUBE VISUAL ── */
+.cube-visual{display:flex;justify-content:center;padding:6px 0}
+.cube-svg{width:80px;height:80px}
+</style>
+</head>
+<body>
+
+<div id="topnav">
+  <button onclick="showTab('resources')">Resources</button>
+  <button onclick="showTab('settings')">Settings</button>
+  <button onclick="showTab('achievements')">Achievements</button>
+  <span class="sep">|</span>
+  <button onclick="doPlatinum()">Platinum</button>
+  <button onclick="notify('Free credits granted!')">Free credits</button>
+  <button onclick="freeNodes()">Free the nodes</button>
+  <span id="gold-display">Gold: 0</span>
+</div>
+
+<div id="tab-resources">
+<div id="game">
+
+  <div class="panel panel-narrow" id="main-resources-panel">
+    <div class="panel-header ph-gold" onclick="togglePanel(this)">Resource Stats <span>▼</span></div>
+    <div class="panel-body">
+      <div class="res-line" style="border-bottom:none; padding-bottom:0;">Gold: <span class="res-value" id="gold-val">0</span> <span class="res-rate" id="gold-rate">(+0/s)</span></div>
+      <div style="padding:2px 4px 5px 4px; border-bottom:1px solid #222;">
+        <button class="btn btn-gold" onclick="manualMineGold()" style="width:100%; padding:2px 0; font-weight:bold; font-size:9px; height:18px;">Manual Mine (+1 Gold)</button>
+      </div>
+      <div class="res-line">Magic: <span class="res-value" id="magic-val">0</span> <span class="res-rate" id="magic-rate">(+0/s)</span></div>
+      <div class="res-line">Holy Fire: <span class="res-value" id="hfire-val">0</span></div>
+      <div class="res-line">Blue Fire: <span class="res-value" id="bfire-val">0</span></div>
+      <div class="res-line">Fire: <span class="res-value" id="fire-val">0</span></div>
+      <div class="res-line">Knowledge: <span class="res-value" id="know-val">0</span></div>
+      <div class="res-line">Tomes: <span class="res-value" id="tomes-val">0</span></div>
+      <div class="res-line">Plague: <span class="res-value" id="plague-val">0</span></div>
+      <div class="res-line">Spores: <span class="res-value" id="spores-val">0</span></div>
+      <div class="res-line">Light Ess: <span class="res-value" id="light-val">0</span></div>
+      <div class="res-line">Dark Ess: <span class="res-value" id="dark-val">0</span></div>
+      <div class="upg-row" style="padding:3px 2px">
+        <button class="btn btn-gold" onclick="hireGoldminer()">Hire goldminer <span id="miner-count">(0)</span></button>
+        <button class="btn btn-gold" onclick="buyMinerAuto()" id="miner-auto-btn">Auto: OFF</button>
+      </div>
+      <div class="upg-row">
+        <span class="small">Become the gold-area</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-scroll" id="void-panel">
+    <div class="panel-header ph-void" onclick="togglePanel(this)">Void magic upgrades ▼</div>
+    <div class="panel-body" id="void-upgrades"></div>
+  </div>
+
+  <div class="panel panel-scroll" id="dark-panel">
+    <div class="panel-header ph-dark" onclick="togglePanel(this)">Dark magic upgrades ▼</div>
+    <div class="panel-body" id="dark-upgrades"></div>
+  </div>
+
+  <div class="panel panel-scroll" id="magic-panel">
+    <div class="panel-header ph-magic" onclick="togglePanel(this)">Magic upgrades &nbsp;<span class="res-amount" id="magic-header-val"></span> ▼</div>
+    <div class="panel-body" id="magic-upgrades"></div>
+  </div>
+
+  <div class="panel" id="magic-res-panel">
+    <div class="panel-header ph-magic" onclick="togglePanel(this)">Magic ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="magic-big">0</span> magic</div>
+      <div class="inline-note">Your magic is multiplying your gold gain by <span id="magic-mult">×1</span></div>
+      <div class="upg-row" style="margin-top:4px">
+        <button class="btn btn-magic" onclick="buyMagicUpg(1)">Increase magic gain</button>
+        <button class="btn btn-magic" onclick="buyMagicUpg(2)">+magic/s</button>
+      </div>
+      <div class="upg-row">
+        <button class="btn btn-magic btn-auto on" id="magic-auto">Auto-min On</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="challenge-panel">
+    <div class="panel-header ph-challenge" onclick="togglePanel(this)">Magic challenges ▼</div>
+    <div class="panel-body">
+      <div class="challenge-grid">
+        <div class="chal-box" onclick="enterChallenge('A1')"><div class="chal-label">A1</div><div class="chal-sub">Gold ×0.01</div></div>
+        <div class="chal-box" onclick="enterChallenge('A2')"><div class="chal-label">A2</div><div class="chal-sub">No magic</div></div>
+        <div class="chal-box" onclick="enterChallenge('B1')"><div class="chal-label">B1</div><div class="chal-sub">No fire</div></div>
+        <div class="chal-box" onclick="enterChallenge('B2')"><div class="chal-label">B2</div><div class="chal-sub">Slow tomes</div></div>
+      </div>
+      <div class="inline-note">Hover over a challenge to see what it does!<br>
+      Best: A1=<span id="best-a1">0</span> A2=<span id="best-a2">0</span> B1=<span id="best-b1">0</span> B2=<span id="best-b2">0</span></div>
+      <div style="padding:3px 4px;display:flex;gap:4px">
+        <button class="btn" onclick="enterChallengeMenu()">Enter challenges</button>
+        <button class="btn" onclick="notify('No active challenge')">Exit challenge</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="holyt-panel">
+    <div class="panel-header ph-holy" onclick="togglePanel(this)">Holy tetrahedrons ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="holyt-val">0</span> holy tetrahedrons</div>
+      <div class="inline-note">Reset all previous progress to get holy tetrahedrons.<br>Gain <span id="holyt-gain">0</span> on reset.</div>
+      <div class="upg-row">
+        <button class="btn btn-holy" onclick="doTetraReset('holy')">Reset for holy tetrahedrons &amp; ASCEND</button>
+      </div>
+      <div id="holyt-upgrades" class="panel-scroll" style="max-height:120px"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="darkt-panel">
+    <div class="panel-header ph-void" onclick="togglePanel(this)">Dark tetrahedrons ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="darkt-val">0</span> dark tetrahedrons</div>
+      <div class="inline-note">Reset for dark tetrahedrons. Gain <span id="darkt-gain">0</span> on reset.</div>
+      <div class="upg-row">
+        <button class="btn" onclick="doTetraReset('dark')">Reset for dark tetrahedrons &amp; ASCEND</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="holyo-panel">
+    <div class="panel-header ph-holy" onclick="togglePanel(this)">Holy octahedrons ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="holyo-val">0</span> holy octahedrons</div>
+      <div class="inline-note">Gain <span id="holyo-gain">0</span> holy octahedrons on reset.</div>
+      <div class="upg-row">
+        <button class="btn btn-holy" onclick="doOctoReset('holy')">Reset for holy octahedrons &amp; ASCEND</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="darko-panel">
+    <div class="panel-header ph-void" onclick="togglePanel(this)">Dark octahedrons ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="darko-val">0</span> dark octahedrons</div>
+      <div class="upg-row">
+        <button class="btn" onclick="doOctoReset('dark')">Reset for dark octahedrons &amp; ASCEND</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="dd-panel">
+    <div class="panel-header ph-gold" onclick="togglePanel(this)">Gold Automation <span class="res-amount" id="gold-header">▼</span></div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="gold-big">0</span> gold</div>
+      <div class="upg-row">
+        <button class="btn btn-gold" onclick="hireGoldminer()">Hire goldminer</button>
+        <button class="btn btn-gold" onclick="hireGoldminer(10)">Buy 10</button>
+      </div>
+      <div class="upg-row">
+        <button class="btn btn-auto" id="dd-auto-btn" onclick="toggleDDAuto()">Auto-min On</button>
+        <button class="btn btn-gold" onclick="buyMaxGold()">Buy max</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="alch1-panel">
+    <div class="panel-header ph-alchemy" onclick="togglePanel(this)">Alchemy I ▼</div>
+    <div class="panel-body">
+      <div class="inline-note">Convert all gold into 0.1% platinum (B)</div>
+      <div class="res-line">Platinum: <span class="res-value" id="plat-val">0</span></div>
+      <div class="inline-note">Platinum upgrades add +1% on magic multiplier.</div>
+      <div id="alch1-upgrades"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="alch2-panel">
+    <div class="panel-header ph-alchemy" onclick="togglePanel(this)">Alchemy II ▼</div>
+    <div class="panel-body">
+      <div class="inline-note">Convert all platinum into 0.1% quantanium (B)</div>
+      <div class="res-line">Quantanium: <span class="res-value" id="quant-val">0</span></div>
+      <div id="alch2-upgrades"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="alch3-panel">
+    <div class="panel-header ph-alchemy" onclick="togglePanel(this)">Alchemy III ▼</div>
+    <div class="panel-body">
+      <div class="inline-note">Convert all quantanium into 0.1% quantanium-2 plasmium</div>
+      <div class="res-line">Plasmium: <span class="res-value" id="plas-val">0</span></div>
+      <div id="alch3-upgrades"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="alch4-panel">
+    <div class="panel-header ph-alchemy" onclick="togglePanel(this)">Alchemy IV ▼</div>
+    <div class="panel-body">
+      <div class="res-line">Quintanium: <span class="res-value" id="quint-val">0</span></div>
+      <div class="inline-note">Alchemy IV gain is based on your current Alchemy III output.</div>
+      <div id="alch4-upgrades"></div>
+    </div>
+  </div>
+
+  <div class="panel panel-scroll" id="hfire-panel">
+    <div class="panel-header ph-holy" onclick="togglePanel(this)">Holy fire upgrades &nbsp;<span class="res-amount" id="hfire-header"></span> ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="hfire-big">0</span> holy fire</div>
+      <div class="inline-note" id="hfire-note">(holy fire gain is based on the damage amount)</div>
+      <div id="hfire-upgrades"></div>
+      <div class="upg-row">
+        <button class="btn btn-holy" onclick="buyMaxHolyFire()">Buy max</button>
+        <button class="btn btn-auto on" id="hfire-auto">Auto-min On</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-scroll" id="bfire-panel">
+    <div class="panel-header ph-blue" onclick="togglePanel(this)">Blue fire upgrades &nbsp;<span class="res-amount" id="bfire-header"></span> ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="bfire-big">0</span> blue fire</div>
+      <div class="inline-note" id="bfire-note">(blue fire gain is based on the 70 blue fire)</div>
+      <div id="bfire-upgrades"></div>
+      <div class="upg-row">
+        <button class="btn btn-blue" onclick="buyMaxBlueFire()">Buy max</button>
+        <button class="btn btn-auto on" id="bfire-auto">Auto-min On</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-scroll" id="fire-panel">
+    <div class="panel-header ph-fire" onclick="togglePanel(this)">Fire upgrades &nbsp;<span class="res-amount" id="fire-header"></span> ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="fire-big">0</span> fire</div>
+      <div id="fire-upgrades"></div>
+      <div class="upg-row">
+        <button class="btn btn-fire" onclick="buyMaxFire()">Buy max</button>
+        <button class="btn btn-auto on" id="fire-auto">Auto-min On</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="dragon-panel">
+    <div class="panel-header ph-void" onclick="togglePanel(this)">Dragon ▼</div>
+    <div class="panel-body">
+      <div class="dragon-area">
+        <div style="text-align:center;padding:6px 0">
+          <div style="font-size:9px;color:#888">You have a</div>
+          <div class="dragon-name" id="dragon-name">Finality dragon</div>
+          <div style="font-size:48px;line-height:1.1" id="dragon-sprite">🐉</div>
+          <div style="font-size:9px;color:#888;font-style:italic" id="dragon-title">Asselin</div>
+        </div>
+        <div class="dragon-desc" id="dragon-desc">Your dragon is composed of the essence of the universe itself. It is physically impossible to become any stronger. (Wow..!)</div>
+        <div class="dragon-desc">You lose multiplying power production by ×0.1%!</div>
+        <div style="margin-top:3px;font-size:9px;color:#aaa" id="dragon-times">You have spent time with your dragon 0 times, increasing gold gain by ×<span id="dragon-mult">1</span>!</div>
+        <div class="upg-row" style="margin-top:4px;flex-wrap:wrap;gap:3px">
+          <button class="btn" onclick="spendTimeWithDragon()">Spend time with your dragon ❤</button>
+          <button class="btn" style="font-size:9px" onclick="feedDragon()">Feed your dragon<br><span style="color:#888">Feed feed requires 1e7 1e3 magic!</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-wide" id="plague-panel">
+    <div class="panel-header ph-plague" onclick="togglePanel(this)">Cosmic plague ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="plague-big">0</span> cosmic plague</div>
+      <div class="res-line">You have <span class="res-value" id="spores-big">0</span> spores</div>
+      <div class="inline-note">Your spores are producing <span id="spore-rate">0</span>/s</div>
+      <div class="upg-row">
+        <button class="btn btn-green" onclick="getSpore()">Get a spore</button>
+        <button class="btn btn-green" onclick="gainMaxPlague()">Auto-max</button>
+        <button class="btn btn-auto on" id="plague-auto">Auto-min On</button>
+      </div>
+      <div id="plague-upgrades"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="tomes-panel">
+    <div class="panel-header ph-teal" onclick="togglePanel(this)">Tomes ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="tomes-big">0</span> tomes</div>
+      <div class="inline-note">total: <span id="tomes-total">0</span></div>
+      <div class="upg-row">
+        <button class="btn btn-cyan" onclick="convertTomes()">Convert your knowledge to tomes</button>
+      </div>
+      <div id="tomes-upgrades" style="margin-top:3px"></div>
+    </div>
+  </div>
+
+  <div class="panel panel-wide" id="know-panel">
+    <div class="panel-header ph-teal" onclick="togglePanel(this)">Knowledge &nbsp;<span class="res-amount" id="know-header"></span> ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="know-big">0</span> Knowledge</div>
+      <div class="inline-note">Highest ever: <span id="know-max">0</span><br>Knowledge helps you get tomes, at the cost of some of your sigil rate.<br>If you change the trade level, it won't apply until you purchase a trade!</div>
+      <div class="know-trade" id="know-trades">
+        <div class="know-box"><div class="kl">Trade 1</div><div class="kv">Lv 1</div><div class="kl">×1 knowledge</div><div class="kl">×0.9 sigil gain</div><div class="kl">1000 knowledge</div><button class="btn" onclick="buyKnowledgeTrade(1)" style="margin-top:2px;width:100%">Purchase</button></div>
+        <div class="know-box"><div class="kl">Trade 2</div><div class="kv">Lv 1</div><div class="kl">×1 knowledge</div><div class="kl">×0.7 sigil gain</div><div class="kl">1000 knowledge</div><button class="btn" onclick="buyKnowledgeTrade(2)" style="margin-top:2px;width:100%">Purchase</button></div>
+        <div class="know-box"><div class="kl">Trade 3</div><div class="kv">Lv 1</div><div class="kl">×1 knowledge</div><div class="kl">×0.5 sigil gain</div><div class="kl">1000 knowledge</div><button class="btn" onclick="buyKnowledgeTrade(3)" style="margin-top:2px;width:100%">Purchase</button></div>
+      </div>
+      <div class="upg-row">
+        <button class="btn btn-auto on" id="know-auto">Auto-min On</button>
+        <button class="btn btn-cyan" onclick="buyMaxKnowledge()">Buy max</button>
+        <button class="btn" onclick="resetKnowledgeTrade()">Reset trade to level 0 (cancel it)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-scroll" id="light-panel">
+    <div class="panel-header ph-light" onclick="togglePanel(this)">Light essence ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="light-big">0</span> light essence</div>
+      <div class="inline-note">You are gaining <span id="light-rate">0</span> light essence per second</div>
+      <div id="light-upgrades"></div>
+      <div class="upg-row">
+        <button class="btn" onclick="buyMaxLight()">Max all</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-scroll" id="dark-ess-panel">
+    <div class="panel-header ph-dark" onclick="togglePanel(this)">Dark essence ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="dark-big">0</span> dark essence</div>
+      <div class="inline-note">You are gaining <span id="dark-rate">0</span> dark essence per second</div>
+      <div id="dark-ess-upgrades"></div>
+      <div class="upg-row">
+        <button class="btn" onclick="buyMaxDark()">Max all</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="csigil-panel">
+    <div class="panel-header ph-cyan" onclick="togglePanel(this)">Cyan sigil ▼</div>
+    <div class="panel-body">
+      <div class="sigil-panel">
+        <div class="sigil-icon" style="color:#44ffee;border-color:#44ffee">✦</div>
+        <div class="sigil-info">
+          <div class="sigil-name" style="color:#44ffee">You have <span id="csigil-val">0</span> cyan sigils</div>
+          <div class="sigil-desc">Reset all previous progress for 1e100 cyan sigils but you may select 1 upgrades and resources.</div>
+          <button class="btn btn-cyan" style="margin-top:2px" onclick="doSigilReset('cyan')">Reset all previous progress for 1e100 cyan sigils</button>
+        </div>
+      </div>
+      <div id="csigil-upgrades"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="bsigil-panel">
+    <div class="panel-header ph-blue2" onclick="togglePanel(this)">Blue sigil ▼</div>
+    <div class="panel-body">
+      <div class="sigil-panel">
+        <div class="sigil-icon" style="color:#44aaff;border-color:#44aaff">✦</div>
+        <div class="sigil-info">
+          <div class="sigil-name" style="color:#44aaff">You have <span id="bsigil-val">0</span> blue sigils</div>
+          <div class="sigil-desc">Reset all previous progress for 1e100 blue sigils but you may select 2 upgrades and resources.</div>
+          <button class="btn btn-blue" style="margin-top:2px" onclick="doSigilReset('blue')">Reset all previous progress for 1e100 blue sigils</button>
+        </div>
+      </div>
+      <div id="bsigil-upgrades"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="isigil-panel">
+    <div class="panel-header ph-indigo" onclick="togglePanel(this)">Indigo sigil ▼</div>
+    <div class="panel-body">
+      <div class="sigil-panel">
+        <div class="sigil-icon" style="color:#8866ff;border-color:#8866ff">✦</div>
+        <div class="sigil-info">
+          <div class="sigil-name" style="color:#8866ff">You have <span id="isigil-val">0</span> indigo sigils</div>
+          <div class="sigil-desc">Reset all previous progress for 1e100 indigo sigils but you may select 3 upgrades and resources.</div>
+          <button class="btn btn-indigo" style="margin-top:2px" onclick="doSigilReset('indigo')">Reset all previous progress for 1e100 indigo sigils</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="death-panel">
+    <div class="panel-header ph-death" onclick="togglePanel(this)">Death essence ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="death-val">0</span> death essence</div>
+      <div class="inline-note">Death essence gain is based on your sigil count (based on 3D).</div>
+      <div id="death-upgrades"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="vsigil-panel">
+    <div class="panel-header ph-violet" onclick="togglePanel(this)">Violet sigil ▼</div>
+    <div class="panel-body">
+      <div class="sigil-panel">
+        <div class="sigil-icon" style="color:#cc44ff;border-color:#cc44ff">✦</div>
+        <div class="sigil-info">
+          <div class="sigil-name" style="color:#cc44ff">You have <span id="vsigil-val">0</span> violet sigils</div>
+          <div class="sigil-desc">Reset all previous progress for 1e100 violet sigils.</div>
+          <button class="btn btn-violet" style="margin-top:2px" onclick="doSigilReset('violet')">Reset all previous progress for 1e100 violet sigils</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="psigil-panel">
+    <div class="panel-header ph-pink" onclick="togglePanel(this)">Pink sigil ▼</div>
+    <div class="panel-body">
+      <div class="sigil-panel">
+        <div class="sigil-icon" style="color:#ff66cc;border-color:#ff66cc">✦</div>
+        <div class="sigil-info">
+          <div class="sigil-name" style="color:#ff66cc">You have <span id="pnsigil-val">0</span> pink sigils</div>
+          <div class="sigil-desc">Reset all previous progress for 1e100 pink sigils.</div>
+          <button class="btn btn-pink" style="margin-top:2px" onclick="doSigilReset('pink')">Reset all previous progress for 1e100 pink sigils</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="sigilauto-panel">
+    <div class="panel-header ph-indigo" onclick="togglePanel(this)">Sigil Automation ▼</div>
+    <div class="panel-body">
+      <div class="inline-note" style="margin-bottom:3px">Auto-reset sigils:</div>
+      <div class="upg-row"><span class="upg-desc">Cyan sigil</span>
+        <select class="btn" id="auto-cyan" style="width:70px"><option>Yellow</option><option>Pink</option><option>Red</option><option>None</option></select>
+      </div>
+      <div class="upg-row"><span class="upg-desc">Blue sigil</span>
+        <select class="btn" id="auto-blue" style="width:70px"><option>Yellow</option><option>Pink</option><option>Red</option><option>None</option></select>
+      </div>
+      <div class="upg-row"><span class="upg-desc">Potential sigil mount</span>
+        <select class="btn" id="auto-potential" style="width:70px"><option>—</option><option>Cyan</option><option>Blue</option><option>Indigo</option></select>
+      </div>
+      <div class="upg-row" style="margin-top:3px">
+        <button class="btn" onclick="maxSigilAuto()">Max can reset sigil upgrades</button>
+      </div>
+      <div class="upg-row">
+        <button class="btn" onclick="maxSigilUpg()">Max sigil upgrades</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="rsigil-panel">
+    <div class="panel-header ph-red" onclick="togglePanel(this)">Red sigil ▼</div>
+    <div class="panel-body">
+      <div class="sigil-panel">
+        <div class="sigil-icon" style="color:#ff4444;border-color:#ff4444">😈</div>
+        <div class="sigil-info">
+          <div class="sigil-name" style="color:#ff4444">You have <span id="rsigil-val">0</span> red sigils</div>
+          <div class="sigil-desc">Sigil gain is unaffected by red sigil multipliers and Yellow: 10% of (each) pure really essence.</div>
+          <button class="btn btn-red" style="margin-top:2px" onclick="doSigilReset('red')">Reset all previous progress for 1e11 red sigils</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="osigil-panel">
+    <div class="panel-header ph-orange" onclick="togglePanel(this)">Orange sigil ▼</div>
+    <div class="panel-body">
+      <div class="sigil-panel">
+        <div class="sigil-icon" style="color:#ff8822;border-color:#ff8822">✦</div>
+        <div class="sigil-info">
+          <div class="sigil-name" style="color:#ff8822">You have <span id="osigil-val">0</span> orange sigils</div>
+          <div class="sigil-desc">Reset all previous progress for 1e11 orange sigils.</div>
+          <button class="btn" style="margin-top:2px;border-color:#663300;color:#ff8822" onclick="doSigilReset('orange')">Reset all previous progress for 1e11 orange sigils</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="ysigil-panel">
+    <div class="panel-header ph-yellow" onclick="togglePanel(this)">Yellow sigil ▼</div>
+    <div class="panel-body">
+      <div class="sigil-panel">
+        <div class="sigil-icon" style="color:#ffdd00;border-color:#ffdd00">⚡</div>
+        <div class="sigil-info">
+          <div class="sigil-name" style="color:#ffdd00">You have <span id="ysigil-val">0</span> yellow sigils</div>
+          <div class="sigil-desc">Multiply page gain and cover yarn to ×0.1 (reach power).</div>
+          <button class="btn" style="margin-top:2px;border-color:#665500;color:#ffdd00" onclick="doSigilReset('yellow')">Reset all previous progress for 1e11 yellow sigils</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="fcube-panel">
+    <div class="panel-header ph-finality" onclick="togglePanel(this)">Finality Cubes ▼</div>
+    <div class="panel-body">
+      <div class="res-line">You have <span class="res-value" id="fcube-val">0</span> finality cubes</div>
+      <div class="cube-visual">
+        <svg class="cube-svg" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="#ff44ff" stroke-width="1.5" fill="none">
+            <rect x="20" y="20" width="30" height="30"/>
+            <rect x="30" y="10" width="30" height="30"/>
+            <line x1="20" y1="20" x2="30" y2="10"/>
+            <line x1="50" y1="20" x2="60" y2="10"/>
+            <line x1="50" y1="50" x2="60" y2="40"/>
+            <line x1="20" y1="50" x2="30" y2="40"/>
+          </g>
+        </svg>
+      </div>
+      <div class="inline-note">Your finality is a small galaxy, made of pure finality essence and perfectly shaped by color of all essence to boost (1e100 per reach power).</div>
+      <div class="upg-row">
+        <button class="btn btn-finality" onclick="doFinalityReset()">Reset for finality cubes</button>
+      </div>
+      <div id="fcube-upgrades"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<div id="tab-settings" style="display:none; padding:12px;">
+  <div class="panel" style="max-width:360px; margin:0 auto;">
+    <div class="panel-header ph-gold">System Configuration &nbsp;<span>⚙</span></div>
+    <div class="panel-body" style="display:flex; flex-direction:column; gap:6px; padding:6px;">
+      <button class="btn btn-gold" style="padding:4px;" onclick="saveGame()">Manual Local Save</button>
+      <button class="btn" style="padding:4px;" onclick="loadGame()">Manual Local Load</button>
+
+      <div style="border-bottom:1px solid #333; margin:4px 0;"></div>
+
+      <div>
+        <div class="small" style="margin-bottom:2px; color:#aaa;">Data Import / Export String:</div>
+        <textarea id="save-string" style="width:100%; height:50px; background:#0d0d0d; color:#fff; border:1px solid #444; font-family:inherit; font-size:9px; padding:3px; resize:none;"></textarea>
+        <div style="display:flex; gap:3px; margin-top:3px;">
+          <button class="btn" style="flex:1;" onclick="exportGameString()">Export Data</button>
+          <button class="btn" style="flex:1;" onclick="importGameString()">Import Data</button>
+        </div>
+      </div>
+
+      <div style="border-bottom:1px solid #333; margin:4px 0;"></div>
+
+      <button class="btn btn-red" style="padding:4px;" onclick="hardResetGame()">⚠️ HARD RESET WIPE ⚠️</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="tab-achievements" style="display:none; padding:12px;">
+  <div class="panel" style="max-width:440px; margin:0 auto;">
+    <div class="panel-header ph-magic">Achievements Log &nbsp;<span id="ach-completion">0/0</span></div>
+    <div class="panel-body panel-scroll" id="achievements-container" style="max-height:360px;">
+      </div>
+  </div>
+</div>
+
+<div id="notif"></div>
+
+<script>
+// ════════════════════════════════════════
+//  DODECADRAGON 2 — Core Engine
+// ════════════════════════════════════════
+
+const G = {
+  gold: 0, goldRate: 0,
+  magic: 0, magicRate: 0.1,
+  hfire: 0, bfire: 0, fire: 0,
+  knowledge: 0, knowledgeMax: 0,
+  tomes: 0, tomesTotal: 0,
+  plague: 0, spores: 0, sporeRate: 0,
+  light: 0, lightRate: 0,
+  dark: 0, darkRate: 0,
+  plat: 0, quant: 0, plas: 0, quint: 0,
+  holyt: 0, darkt: 0, holyo: 0, darko: 0,
+  miners: 0, minerAuto: false, ddAuto: false,
+  magicAuto: true, hfireAuto: true, bfireAuto: true, fireAuto: true,
+  plagueAuto: true, knowAuto: true,
+  dragonTimes: 0, dragonMult: 1,
+  sigils: {cyan:0,blue:0,indigo:0,death:0,violet:0,pink:0,red:0,orange:0,yellow:0},
+  fcubes: 0,
+  upgrades: {},
+  tick: 0,
+  totalGold: 0,
+  challengeBests: {A1:0,A2:0,B1:0,B2:0},
+  unlocks: {
+    magic: false,
+    challenges: false,
+    fire: false,
+    knowledge: false,
+    holy: false,
+    plague: false,
+    essence: false,
+    sigils: false,
+    finality: false
+  },
+  achievements: {},
+  achMultiplier: 1
+};
+
+// Expanded, diverse lists of progressive milestones
+const MILESTONES = [
+  { id: 'm_click', name: 'Manual Labor', desc: 'Mine your first piece of gold by hand.', criteria: () => G.totalGold >= 1 },
+  { id: 'm_miner1', name: 'Apprenticed Automation', desc: 'Hire at least 1 automated goldminer.', criteria: () => G.miners >= 1 },
+  { id: 'm_miner10', name: 'Industrial Overlord', desc: 'Amass a team of 10 automated miners.', criteria: () => G.miners >= 10 },
+  { id: 'm_gold1k', name: 'Wealth Accumulator', desc: 'Reach 1,000 total gold tokens.', criteria: () => G.gold >= 1000 },
+  { id: 'm_gold1e6', name: 'Vault Tycoon', desc: 'Accumulate 1,000,000 gold tokens.', criteria: () => G.gold >= 1000000 },
+  { id: 'm_magic', name: 'Sorcerer Spark', desc: 'Unlock primary Magic energy arrays.', criteria: () => G.unlocks.magic },
+  { id: 'm_magic500', name: 'Arcane Master', desc: 'Hold over 500 volatile mana power points.', criteria: () => G.magic >= 500 },
+  { id: 'm_chal', name: 'Willing Challenger', desc: 'Unlock access to the Magic Challenges terminal.', criteria: () => G.unlocks.challenges },
+  { id: 'm_fire', name: 'Arson Specialist', desc: 'Unlock the scorching elements of Fire.', criteria: () => G.unlocks.fire },
+  { id: 'm_tome', name: 'Librarian Core', desc: 'Extract your very first academic Tome.', criteria: () => G.tomesTotal >= 1 },
+  { id: 'm_tome10', name: 'Arch-Scholar', desc: 'Accumulate 10 grand Tomes over time.', criteria: () => G.tomesTotal >= 10 },
+  { id: 'm_holy', name: 'Sacred Geometry', desc: 'Unlock Holy & Void Tier ascendancies.', criteria: () => G.unlocks.holy },
+  { id: 'm_plague', name: 'Biohazard Evolution', desc: 'Sustain cosmic infections and unlock Plague.', criteria: () => G.unlocks.plague },
+  { id: 'm_essence', name: 'Astral Weaver', desc: 'Unlock raw Light and Dark Essences.', criteria: () => G.unlocks.essence },
+  { id: 'm_sigil', name: 'Seals of Power', desc: 'Break structural bounds to unlock Sigils.', criteria: () => G.unlocks.sigils },
+  { id: 'm_dragon', name: 'Draconic Bonding', desc: 'Spend time bonding with your dragon 5 times.', criteria: () => G.dragonTimes >= 5 },
+  { id: 'm_cube', name: 'Ultimate Paradox', desc: 'Synthesize your first Finality Cube element.', criteria: () => G.fcubes >= 1 }
+];
+
+function fmt(n){
+  if(n<1000)return Math.floor(n).toString();
+  const e=Math.floor(Math.log10(Math.abs(n)));
+  const m=n/Math.pow(10,e);
+  if(e<6)return n.toLocaleString('en',{maximumFractionDigits:0});
+  return 'e'+m.toFixed(2)+'e'+e;
+}
+
+function fmtDec(n,d=2){
+  if(n<1000)return n.toFixed(d);
+  return fmt(n);
+}
+
+function notify(msg,dur=2500){
+  const el=document.getElementById('notif');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+function togglePanel(hdr){
+  hdr.parentElement.classList.toggle('panel-collapsed');
+}
+
+function showTab(t){
+  document.getElementById('tab-resources').style.display = t === 'resources' ? 'block' : 'none';
+  document.getElementById('tab-settings').style.display = t === 'settings' ? 'block' : 'none';
+  document.getElementById('tab-achievements').style.display = t === 'achievements' ? 'block' : 'none';
+  if(t === 'achievements') updateAchievementsUI();
+}
+
+// ── MINING & ACHIEVEMENT MOTORS ──
+function manualMineGold() {
+  G.gold += 1;
+  G.totalGold += 1;
+  updateUI();
+}
+
+function checkAchievements() {
+  if (!G.achievements) G.achievements = {};
+  let newlyUnlocked = false;
+  MILESTONES.forEach(m => {
+    if (!G.achievements[m.id] && m.criteria()) {
+      G.achievements[m.id] = true;
+      newlyUnlocked = true;
+      notify(`🏆 Milestone Reached: ${m.name}! (+10% Mult)`);
+    }
+  });
+
+  // Calculate total achievement count
+  let count = 0;
+  MILESTONES.forEach(m => {
+    if(G.achievements[m.id]) count++;
+  });
+
+  // Each gives +10% production bonus layout additive logic
+  G.achMultiplier = 1 + (count * 0.10);
+}
+
+function updateAchievementsUI() {
+  const container = document.getElementById('achievements-container');
+  if(!container) return;
+  container.innerHTML = '';
+
+  // Header statistics bar
+  let unlockedCount = 0;
+  MILESTONES.forEach(m => { if(G.achievements && G.achievements[m.id]) unlockedCount++; });
+
+  const statsBar = document.createElement('div');
+  statsBar.style.padding = '5px';
+  statsBar.style.marginBottom = '6px';
+  statsBar.style.background = '#222';
+  statsBar.style.border = '1px dashed #555';
+  statsBar.style.textAlign = 'center';
+  statsBar.innerHTML = `<span style="color:#ffd700; font-weight:bold;">Global Achievement Multiplier: ×${G.achMultiplier.toFixed(2)}</span><br><span style="color:#888; font-size:9px;">Each completed milestone grants +10% structural yield to all Gold and Magic tasks.</span>`;
+  container.appendChild(statsBar);
+
+  MILESTONES.forEach(m => {
+    const isUnlocked = G.achievements && G.achievements[m.id];
+    const row = document.createElement('div');
+    row.className = 'upg-row';
+    row.style.padding = '4px 6px';
+    if(isUnlocked) {
+      row.style.background = '#0e2411';
+      row.style.borderLeft = '2px solid #44cc44';
+    } else {
+      row.style.opacity = '0.45';
+      row.style.borderLeft = '2px solid #444';
+    }
+
+    row.innerHTML = `
+      <div class="upg-desc">
+        <span class="bold" style="${isUnlocked ? 'color:#55ee55;' : ''}">${m.name}</span><br>
+        <span class="small" style="color:#aaa;">${m.desc}</span>
+      </div>
+      <div style="font-size:9px; font-weight:bold; color:${isUnlocked ? '#55ee55' : '#666'}">
+        ${isUnlocked ? 'COMPLETE' : 'LOCKED'}
+      </div>
+    `;
+    container.appendChild(row);
+  });
+
+  document.getElementById('ach-completion').textContent = `${unlockedCount}/${MILESTONES.length}`;
+}
+
+// ── REWORKED PROGRESSIVE GATED UNLOCKS ──
+function checkLinearUnlocks() {
+  if (!G.unlocks) {
+    G.unlocks = { magic: false, challenges: false, fire: false, knowledge: false, holy: false, plague: false, essence: false, sigils: false, finality: false };
+  }
+
+  // Progressive resource gates
+  if (!G.unlocks.magic && G.gold >= 100) { G.unlocks.magic = true; notify("Magic Systems Discovered!"); }
+  if (G.unlocks.magic && !G.unlocks.fire && G.magic >= 250) { G.unlocks.fire = true; notify("Fire Elemental Matrix Online!"); }
+  if (G.unlocks.magic && !G.unlocks.challenges && G.magic >= 500) { G.unlocks.challenges = true; notify("Magic Challenges Terminals Ready!"); }
+  if (G.unlocks.fire && !G.unlocks.knowledge && G.fire >= 50) { G.unlocks.knowledge = true; notify("Intellectual Knowledge Matrix Activated!"); }
+  if (G.unlocks.knowledge && !G.unlocks.holy && G.tomes >= 10) { G.unlocks.holy = true; notify("Sacred Ascendancies & Transmutation Unlocked!"); }
+  if (G.unlocks.holy && !G.unlocks.plague && G.holyt >= 5) { G.unlocks.plague = true; notify("Cosmic Plague Contagion Unlocked!"); }
+  if (G.unlocks.plague && !G.unlocks.essence && G.plague >= 500) { G.unlocks.essence = true; notify("Ethereal Essence Focal Points Unlocked!"); }
+  if (G.unlocks.essence && !G.unlocks.sigils && G.light >= 2500) { G.unlocks.sigils = true; notify("Ancient Inscription Runes & Sigils Deciphered!"); }
+  if (G.unlocks.sigils && !G.unlocks.finality && (G.sigils.cyan > 0 || G.fcubes > 0)) { G.unlocks.finality = true; notify("Paradoxical Finality Cube Unlocked!"); }
+
+  // Interface view mapping updates
+  document.getElementById('magic-panel').style.display = G.unlocks.magic ? '' : 'none';
+  document.getElementById('magic-res-panel').style.display = G.unlocks.magic ? '' : 'none';
+  document.getElementById('challenge-panel').style.display = G.unlocks.challenges ? '' : 'none';
+  document.getElementById('fire-panel').style.display = G.unlocks.fire ? '' : 'none';
+  document.getElementById('know-panel').style.display = G.unlocks.knowledge ? '' : 'none';
+  document.getElementById('tomes-panel').style.display = G.unlocks.knowledge ? '' : 'none';
+
+  const showHoly = G.unlocks.holy ? '' : 'none';
+  document.getElementById('holyt-panel').style.display = showHoly;
+  document.getElementById('darkt-panel').style.display = showHoly;
+  document.getElementById('holyo-panel').style.display = showHoly;
+  document.getElementById('darko-panel').style.display = showHoly;
+  document.getElementById('hfire-panel').style.display = showHoly;
+  document.getElementById('bfire-panel').style.display = showHoly;
+  document.getElementById('void-panel').style.display = showHoly;
+  document.getElementById('dark-panel').style.display = showHoly;
+  document.getElementById('alch1-panel').style.display = showHoly;
+  document.getElementById('alch2-panel').style.display = showHoly;
+  document.getElementById('alch3-panel').style.display = showHoly;
+  document.getElementById('alch4-panel').style.display = showHoly;
+  document.getElementById('dragon-panel').style.display = showHoly;
+
+  document.getElementById('plague-panel').style.display = G.unlocks.plague ? '' : 'none';
+  document.getElementById('light-panel').style.display = G.unlocks.essence ? '' : 'none';
+  document.getElementById('dark-ess-panel').style.display = G.unlocks.essence ? '' : 'none';
+
+  const showSigils = G.unlocks.sigils ? '' : 'none';
+  document.getElementById('csigil-panel').style.display = showSigils;
+  document.getElementById('bsigil-panel').style.display = showSigils;
+  document.getElementById('isigil-panel').style.display = showSigils;
+  document.getElementById('vsigil-panel').style.display = showSigils;
+  document.getElementById('psigil-panel').style.display = showSigils;
+  document.getElementById('rsigil-panel').style.display = showSigils;
+  document.getElementById('osigil-panel').style.display = showSigils;
+  document.getElementById('ysigil-panel').style.display = showSigils;
+  document.getElementById('death-panel').style.display = showSigils;
+  document.getElementById('sigilauto-panel').style.display = showSigils;
+
+  document.getElementById('fcube-panel').style.display = G.unlocks.finality ? '' : 'none';
+}
+
+// ── ENGINE PROFILE ENGINE CONFIGURATION ──
+function exportGameString() {
+  saveGame();
+  try {
+    const bstr = btoa(JSON.stringify({G: G}));
+    document.getElementById('save-string').value = bstr;
+    navigator.clipboard.writeText(bstr);
+    notify('Save configuration compressed and copied!');
+  } catch(e) {
+    notify('Failed to isolate configurations.');
+  }
+}
+
+function importGameString() {
+  const target = document.getElementById('save-string').value.trim();
+  if(!target) return notify('Please enter a structural data profile sequence string.');
+  try {
+    const raw = JSON.parse(atob(target));
+    if(raw && raw.G) {
+      Object.assign(G, raw.G);
+      rebuildAll();
+      updateUI();
+      notify('State configuration profile deployed!');
+    }
+  } catch(e) {
+    notify('Profile mismatch or corrupted string data.');
+  }
+}
+
+function hardResetGame() {
+  if(confirm('Are you entirely certain? This completely wipes out local progress permanently.')) {
+    localStorage.removeItem('dd2save');
+    window.location.reload();
+  }
+}
+
+// ── IMMUTABLE SYSTEM REGISTRIES ──
+const VOID_UPGRADES = [
+  {id:'v1',name:'Multiply void magic gain',desc:'Currently: ×1',cost:()=>100*Math.pow(3,G.upgrades.v1||0),currency:'magic',effect:()=>{G.magicRate*=1.5},short:'×1.5 void magic'},
+  {id:'v2',name:'Void magic multiplies gold',desc:'Currently: ×1',cost:()=>500*Math.pow(4,(G.upgrades.v2||0)),currency:'magic',effect:()=>{G.goldRate*=1.2},short:'×1.2 gold mult'},
+  {id:'v3',name:'Void reduces fire cost',desc:'Currently: ×1',cost:()=>2000*Math.pow(5,(G.upgrades.v3||0)),currency:'magic',effect:()=>{},short:'−10% fire cost'},
+  {id:'v4',name:'FREE EQUALIZER',desc:'For gain≥ always equals gold',cost:()=>1e6*Math.pow(6,(G.upgrades.v4||0)),currency:'magic',effect:()=>{G.goldRate*=2},short:'×2 gold'},
+  {id:'v5',name:'Multiply global affecing',desc:'+1% per buy',cost:()=>1e8*Math.pow(7,(G.upgrades.v5||0)),currency:'magic',effect:()=>{G.magicRate*=1.01},short:'+1% everything'},
+  {id:'v6',name:'Unlock Cosmic Plagues',desc:'One time',cost:()=>1e10,currency:'magic',effect:()=>{document.getElementById('plague-panel').style.display='block'},short:'Unlock plague',once:true},
+];
+
+const DARK_UPGRADES = [
+  {id:'d1',name:'Multiply dark magic gain',desc:'',cost:()=>200*Math.pow(3,(G.upgrades.d1||0)),currency:'magic',effect:()=>{G.darkRate+=0.1},short:'×1.5 dark gain'},
+  {id:'d2',name:'Darc multiplies gold',desc:'',cost:()=>1000*Math.pow(4,(G.upgrades.d2||0)),currency:'magic',effect:()=>{G.goldRate*=1.3},short:'×1.3 gold'},
+  {id:'d3',name:'Dark doubles knowledge',desc:'',cost:()=>5000*Math.pow(5,(G.upgrades.d3||0)),currency:'knowledge',effect:()=>{G.knowledgeMax*=1.5},short:'×1.5 know'},
+  {id:'d4',name:'Multiply dark affecing',desc:'',cost:()=>5e4*Math.pow(6,(G.upgrades.d4||0)),currency:'magic',effect:()=>{G.darkRate*=2},short:'×2 dark rate'},
+];
+
+const MAGIC_UPGRADES = [
+  {id:'m1',name:'Multiply magic gain ×10',desc:'',cost:()=>50*Math.pow(2,(G.upgrades.m1||0)),currency:'gold',effect:()=>{G.magicRate*=1.5},short:'×1.5 magic/s'},
+  {id:'m2',name:'Magic production ×10 per 10',desc:'',cost:()=>500*Math.pow(3,(G.upgrades.m2||0)),currency:'gold',effect:()=>{G.magicRate*=2},short:'×2 magic/s'},
+  {id:'m3',name:'Square magic gain',desc:'',cost:()=>1e4*Math.pow(5,(G.upgrades.m3||0)),currency:'gold',effect:()=>{G.magicRate*=5},short:'×5 magic/s'},
+  {id:'m4',name:'Magic ×1000',desc:'',cost:()=>1e6*Math.pow(8,(G.upgrades.m4||0)),currency:'gold',effect:()=>{G.magicRate*=10},short:'×10 magic/s'},
+  {id:'m5',name:'Multiply cosmic magic gain',desc:'',cost:()=>1e8*Math.pow(10,(G.upgrades.m5||0)),currency:'magic',effect:()=>{G.magicRate*=3},short:'×3 magic/s'},
+];
+
+const HFIRE_UPGRADES = [
+  {id:'hf1',name:'Multiply holy fire production',desc:'',cost:()=>10*Math.pow(3,(G.upgrades.hf1||0)),currency:'hfire',effect:()=>{G.hfire+=1},short:'×1.5 holy fire'},
+  {id:'hf2',name:'Multiply dragon time production',desc:'',cost:()=>50*Math.pow(4,(G.upgrades.hf2||0)),currency:'hfire',effect:()=>{G.dragonMult*=1.1},short:'+10% dragon mult'},
+  {id:'hf3',name:'Holy fire time spent cap upon',desc:'Currently: 4',cost:()=>200*Math.pow(5,(G.upgrades.hf3||0)),currency:'hfire',effect:()=>{},short:'↑ holy fire cap'},
+  {id:'hf4',name:'Multiply dodeca-dodeca-gain',desc:'',cost:()=>1e3*Math.pow(6,(G.upgrades.hf4||0)),currency:'hfire',effect:()=>{G.goldRate*=1.2},short:'×1.2 gold rate'},
+  {id:'hf5',name:'Multiply knowledge gain from tomes',desc:'',cost:()=>5e3*Math.pow(7,(G.upgrades.hf5||0)),currency:'hfire',effect:()=>{},short:'×2 tome→know'},
+];
+
+const BFIRE_UPGRADES = [
+  {id:'bf1',name:'Increase blue production',desc:'',cost:()=>15*Math.pow(3,(G.upgrades.bf1||0)),currency:'bfire',effect:()=>{G.bfire+=1},short:'×1.5 blue fire'},
+  {id:'bf2',name:'Increase production of 70 blue fire',desc:'',cost:()=>80*Math.pow(4,(G.upgrades.bf2||0)),currency:'bfire',effect:()=>{},short:'×1.5 bfire/s'},
+  {id:'bf3',name:'Increase stabolism of 70',desc:'',cost:()=>400*Math.pow(5,(G.upgrades.bf3||0)),currency:'bfire',effect:()=>{},short:'×2 stability'},
+  {id:'bf4',name:'Increase magic hack up',desc:'',cost:()=>2e3*Math.pow(6,(G.upgrades.bf4||0)),currency:'magic',effect:()=>{G.magicRate*=1.2},short:'×1.2 magic hack'},
+  {id:'bf5',name:'Multiply knowledge gain from trader',desc:'',cost:()=>1e4*Math.pow(7,(G.upgrades.bf5||0)),currency:'knowledge',effect:()=>{},short:'×1.5 trader know'},
+];
+
+const FIRE_UPGRADES = [
+  {id:'fi1',name:'Increase fire production',desc:'',cost:()=>5*Math.pow(2,(G.upgrades.fi1||0)),currency:'fire',effect:()=>{G.fire+=0.5},short:'×1.5 fire/s'},
+  {id:'fi2',name:'Multiply fire ×10',desc:'',cost:()=>30*Math.pow(3,(G.upgrades.fi2||0)),currency:'fire',effect:()=>{G.fire+=5},short:'×10 fire burst'},
+  {id:'fi3',name:'Fire multiplies gold',desc:'',cost:()=>150*Math.pow(4,(G.upgrades.fi3||0)),currency:'fire',effect:()=>{G.goldRate*=1.1},short:'+10% gold rate'},
+  {id:'fi4',name:'Multiply all affecing',desc:'',cost:()=>800*Math.pow(5,(G.upgrades.fi4||0)),currency:'fire',effect:()=>{G.magicRate*=1.1;G.goldRate*=1.1},short:'×1.1 global'},
+];
+
+const PLAGUE_UPGRADES = [
+  {id:'pl1',name:'Get a spore',desc:'',cost:()=>5*Math.pow(2,(G.upgrades.pl1||0)),currency:'plague',effect:()=>{G.spores+=1},short:'+1 spore'},
+  {id:'pl2',name:'Multiply spore planet affecing',desc:'',cost:()=>30*Math.pow(3,(G.upgrades.pl2||0)),currency:'plague',effect:()=>{G.sporeRate*=1.5},short:'×1.5 spore rate'},
+  {id:'pl3',name:'Increase hive gain',desc:'',cost:()=>200*Math.pow(4,(G.upgrades.pl3||0)),currency:'plague',effect:()=>{G.goldRate*=1.05},short:'+5% gold'},
+  {id:'pl4',name:'Increase lite gain',desc:'',cost:()=>1e3*Math.pow(5,(G.upgrades.pl4||0)),currency:'plague',effect:()=>{G.lightRate+=0.1},short:'+light/s'},
+  {id:'pl5',name:'Increase spore gain ×10',desc:'',cost:()=>5e3*Math.pow(6,(G.upgrades.pl5||0)),currency:'plague',effect:()=>{G.sporeRate*=2},short:'×2 spores'},
+];
+
+const LIGHT_UPGRADES = [
+  {id:'li1',name:'Multiply light essence gain',desc:'',cost:()=>10*Math.pow(3,(G.upgrades.li1||0)),currency:'light',effect:()=>{G.lightRate*=1.5},short:'×1.5 light/s'},
+  {id:'li2',name:'Light amplifies gold gain',desc:'',cost:()=>100*Math.pow(4,(G.upgrades.li2||0)),currency:'light',effect:()=>{G.goldRate*=1.1},short:'+10% gold'},
+  {id:'li3',name:'Light essence ×10',desc:'',cost:()=>1e3*Math.pow(5,(G.upgrades.li3||0)),currency:'light',effect:()=>{G.lightRate*=2},short:'×2 light/s'},
+  {id:'li4',name:'Unlock cosmic plat gain',desc:'',cost:()=>1e5*Math.pow(6,(G.upgrades.li4||0)),currency:'light',effect:()=>{},short:'unlock plat gain'},
+];
+
+const DARK_ESS_UPGRADES = [
+  {id:'de1',name:'Multiply dark essence gain',desc:'',cost:()=>10*Math.pow(3,(G.upgrades.de1||0)),currency:'dark',effect:()=>{G.darkRate*=1.5},short:'×1.5 dark/s'},
+  {id:'de2',name:'Dark amplifies magic gain',desc:'',cost:()=>100*Math.pow(4,(G.upgrades.de2||0)),currency:'dark',effect:()=>{G.magicRate*=1.2},short:'+20% magic'},
+  {id:'de3',name:'Dark multiplies void magic',desc:'',cost:()=>1e3*Math.pow(5,(G.upgrades.de3||0)),currency:'dark',effect:()=>{G.magicRate*=3},short:'×3 void magic'},
+];
+
+function buildUpgPanel(containerId,upgArr,btnClass,currency){
+  const el=document.getElementById(containerId);
+  el.innerHTML='';
+  upgArr.forEach(u=>{
+    const lv=G.upgrades[u.id]||0;
+    const cost=u.cost();
+    const row=document.createElement('div');
+    row.className='upg-row';
+    row.id='row-'+u.id;
+    row.innerHTML=`<div class="upg-desc"><span class="bold">${u.name}</span><br><span class="small">${u.short} — Currently Lv ${lv}</span></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+      <span class="upg-cost">Cost: ${fmt(cost)} ${currency||u.currency}</span>
+      <div style="display:flex;gap:2px">
+        <button class="btn ${btnClass}" onclick="buyUpgrade('${u.id}')">Buy</button>
+        <button class="btn ${btnClass}" onclick="buyMaxUpgrade('${u.id}')">Buy max</button>
+      </div>
+    </div>`;
+    el.appendChild(row);
+  });
+}
+
+function buyUpgrade(id){
+  const all=[...VOID_UPGRADES,...DARK_UPGRADES,...MAGIC_UPGRADES,...HFIRE_UPGRADES,...BFIRE_UPGRADES,...FIRE_UPGRADES,...PLAGUE_UPGRADES,...LIGHT_UPGRADES,...DARK_ESS_UPGRADES];
+  const u=all.find(x=>x.id===id);
+  if(!u)return;
+  const cost=u.cost();
+  const cur=u.currency;
+  if(G[cur]>=cost){
+    G[cur]-=cost;
+    G.upgrades[id]=(G.upgrades[id]||0)+1;
+    u.effect();
+    rebuildAll();
+    notify(`Bought: ${u.name}`);
+  } else {
+    notify(`Need ${fmt(cost)} ${cur}!`);
+  }
+}
+
+function buyMaxUpgrade(id){
+  let bought=0;
+  for(let i=0;i<200;i++){
+    const all=[...VOID_UPGRADES,...DARK_UPGRADES,...MAGIC_UPGRADES,...HFIRE_UPGRADES,...BFIRE_UPGRADES,...FIRE_UPGRADES,...PLAGUE_UPGRADES,...LIGHT_UPGRADES,...DARK_ESS_UPGRADES];
+    const u=all.find(x=>x.id===id);
+    if(!u)break;
+    const cost=u.cost();
+    if(G[u.currency]>=cost){G[u.currency]-=cost;G.upgrades[id]=(G.upgrades[id]||0)+1;u.effect();bought++;}
+    else break;
+  }
+  if(bought>0){rebuildAll();notify(`Bought ${bought}×`);}
+  else notify('Cannot afford!');
+}
+
+function rebuildAll(){
+  buildUpgPanel('void-upgrades',VOID_UPGRADES,'btn-magic','magic');
+  buildUpgPanel('dark-upgrades',DARK_UPGRADES,'btn-magic','magic');
+  buildUpgPanel('magic-upgrades',MAGIC_UPGRADES,'btn-gold','gold');
+  buildUpgPanel('hfire-upgrades',HFIRE_UPGRADES,'btn-holy','hfire');
+  buildUpgPanel('bfire-upgrades',BFIRE_UPGRADES,'btn-blue','bfire');
+  buildUpgPanel('fire-upgrades',FIRE_UPGRADES,'btn-fire','fire');
+  buildUpgPanel('plague-upgrades',PLAGUE_UPGRADES,'btn-green','plague');
+  buildUpgPanel('light-upgrades',LIGHT_UPGRADES,'','light');
+  buildUpgPanel('dark-ess-upgrades',DARK_ESS_UPGRADES,'','dark');
+}
+
+// ── UTILITY DELEGATIONS ──
+function hireGoldminer(n=1){
+  const cost=10*Math.pow(1.15,G.miners)*n;
+  if(G.gold>=cost){G.gold-=cost;G.miners+=n;G.goldRate=G.miners*0.1;notify(`+${n} miner(s)`);}
+  else notify(`Need ${fmt(cost)} gold!`);
+}
+function buyMinerAuto(){G.minerAuto=!G.minerAuto;document.getElementById('miner-auto-btn').textContent='Auto: '+(G.minerAuto?'ON':'OFF');}
+function toggleDDAuto(){G.ddAuto=!G.ddAuto;document.getElementById('dd-auto-btn').textContent='Auto-min '+(G.ddAuto?'On':'Off');}
+function buyMaxGold(){hireGoldminer(Math.floor(G.gold/Math.max(1,10*Math.pow(1.15,G.miners))));}
+function buyMagicUpg(t){const cost=100*Math.pow(3,G.upgrades['mq'+t]||0);if(G.magic>=cost){G.magic-=cost;G.magicRate*=1.5;G.upgrades['mq'+t]=(G.upgrades['mq'+t]||0)+1;notify('Magic upgraded!');}else notify('Not enough magic!');}
+function buyMaxHolyFire(){notify('Bought max holy fire upgrades');}
+function buyMaxBlueFire(){notify('Bought max blue fire upgrades');}
+function buyMaxFire(){notify('Bought max fire upgrades');}
+function getSpore(){G.spores++;G.sporeRate+=0.01;}
+function gainMaxPlague(){notify('Auto-max plague set');}
+function convertTomes(){if(G.knowledge>=100){G.tomes+=Math.floor(G.knowledge/100);G.tomesTotal+=Math.floor(G.knowledge/100);G.knowledge=0;notify('Knowledge → Tomes!');}else notify('Need 100 knowledge!');}
+function buyKnowledgeTrade(t){const cost=1000*t;if(G.knowledge>=cost){G.knowledge-=cost;notify(`Trade ${t} purchased!`);}else notify('Not enough knowledge!');}
+function resetKnowledgeTrade(){notify('Trade reset to level 0');}
+function buyMaxKnowledge(){notify('Bought max knowledge upgrades');}
+function buyMaxLight(){buyMaxUpgrade('li1');buyMaxUpgrade('li2');buyMaxUpgrade('li3');}
+function buyMaxDark(){buyMaxUpgrade('de1');buyMaxUpgrade('de2');buyMaxUpgrade('de3');}
+function spendTimeWithDragon(){G.dragonTimes++;G.dragonMult=1+G.dragonTimes*0.01;notify('Spent time with dragon! ❤');}
+function feedDragon(){if(G.magic>=1e7){G.magic-=1e7;G.dragonMult*=2;notify('Dragon fed! ×2 gold mult!');}else notify('Need 1e7 magic!');}
+function doTetraReset(t){if(confirm('Reset all progress for '+t+' tetrahedrons?')){const gain=Math.max(1,Math.floor(Math.log10(Math.max(1,G.gold))));G[t+'t']+=gain;G.gold=0;G.miners=0;G.goldRate=0;G.magic=0;G.magicRate=0.1;rebuildAll();notify('+'+gain+' '+t+' tetrahedrons!');}}
+function doOctoReset(t){if(confirm('Reset for '+t+' octahedrons?')){const gain=Math.max(1,Math.floor(Math.log10(Math.max(1,G[t+'t']))));G[t+'o']+=gain;G[t+'t']=0;notify('+'+gain+' '+t+' octahedrons!');}}
+function doSigilReset(color){if(confirm('Reset ALL progress for '+color+' sigils?')){G.sigils[color]+=1e100;notify('Reset! +1e100 '+color+' sigils!');updateSigils();}}
+function doFinalityReset(){if(confirm('Finality reset? This resets EVERYTHING.')){G.fcubes++;notify('+1 Finality Cube!');}}
+function enterChallenge(id){notify('Entered challenge '+id+'!');}
+function enterChallengeMenu(){notify('Opening challenge menu...');}
+function doPlatinum(){notify('Platinum menu (not yet implemented)');}
+function freeNodes(){notify('Nodes freed!');}
+function maxSigilAuto(){notify('Sigil auto maxed');}
+function maxSigilUpg(){notify('Sigil upgrades maxed');}
+
+function updateSigils(){
+  document.getElementById('csigil-val').textContent=fmt(G.sigils.cyan);
+  document.getElementById('bsigil-val').textContent=fmt(G.sigils.blue);
+  document.getElementById('isigil-val').textContent=fmt(G.sigils.indigo);
+  document.getElementById('vsigil-val').textContent=fmt(G.sigils.violet);
+  document.getElementById('pnsigil-val').textContent=fmt(G.sigils.pink);
+  document.getElementById('rsigil-val').textContent=fmt(G.sigils.red);
+  document.getElementById('osigil-val').textContent=fmt(G.sigils.orange);
+  document.getElementById('ysigil-val').textContent=fmt(G.sigils.yellow);
+  document.getElementById('death-val').textContent=fmt(G.sigils.death);
+}
+
+// ── ENGINE TIME-TICK CORE ──
+function tick(){
+  const dt=0.1;
+  G.tick++;
+
+  checkAchievements();
+
+  // Multipliers processed with achievement metrics safely isolated to calculation scale
+  const activeGoldRate = G.miners * 0.1 * (1 + G.magic * 0.0001) * G.dragonMult * G.achMultiplier;
+  G.gold += activeGoldRate * dt;
+  G.totalGold += activeGoldRate * dt;
+
+  // Magic production scaled with active achievement milestones
+  const activeMagicRate = G.magicRate * G.achMultiplier;
+  G.magic += activeMagicRate * dt;
+
+  // Secondary elements slow background growth tasks
+  G.hfire += 0.001 * dt * (1 + (G.upgrades.hf1||0) * 0.5);
+  G.bfire += 0.001 * dt * (1 + (G.upgrades.bf1||0) * 0.5);
+  G.fire += 0.002 * dt * (1 + (G.upgrades.fi1||0) * 0.5);
+
+  G.knowledge += 0.005 * dt * (1 + (G.upgrades.d3||0) * 0.5);
+  G.knowledgeMax = Math.max(G.knowledgeMax, G.knowledge);
+
+  G.sporeRate = G.spores * 0.01 * (1 + (G.upgrades.pl2||0) * 0.5);
+  G.plague += G.sporeRate * dt;
+
+  G.lightRate = 0.005 * (1 + (G.upgrades.li1||0) * 0.5);
+  G.light += G.lightRate * dt;
+  G.darkRate = 0.003 * (1 + (G.upgrades.de1||0) * 0.5);
+  G.dark += G.darkRate * dt;
+
+  G.plat += G.gold * 0.001 * dt;
+  G.quant += G.plat * 0.001 * dt;
+  G.plas += G.quant * 0.001 * dt;
+  G.quint += G.plas * 0.001 * dt;
+
+  if(G.minerAuto && G.tick % 20 === 0){
+    const cost = 10 * Math.pow(1.15, G.miners);
+    if(G.gold >= cost){ G.gold -= cost; G.miners++; }
+  }
+
+  updateUI();
+}
+
+function updateUI(){
+  document.getElementById('gold-val').textContent=fmt(G.gold);
+  document.getElementById('gold-rate').textContent='(+'+fmtDec(G.miners*0.1*(1+G.magic*0.0001)*G.dragonMult*G.achMultiplier)+'/s)';
+  document.getElementById('magic-val').textContent=fmt(G.magic);
+  document.getElementById('magic-rate').textContent='(+'+fmtDec(G.magicRate*G.achMultiplier)+'/s)';
+  document.getElementById('hfire-val').textContent=fmt(G.hfire);
+  document.getElementById('bfire-val').textContent=fmt(G.bfire);
+  document.getElementById('fire-val').textContent=fmt(G.fire);
+  document.getElementById('know-val').textContent=fmt(G.knowledge);
+  document.getElementById('tomes-val').textContent=fmt(G.tomes);
+  document.getElementById('plague-val').textContent=fmt(G.plague);
+  document.getElementById('spores-val').textContent=fmt(G.spores);
+  document.getElementById('light-val').textContent=fmt(G.light);
+  document.getElementById('dark-val').textContent=fmt(G.dark);
+
+  document.getElementById('gold-display').textContent='Gold: '+fmt(G.gold);
+  document.getElementById('gold-big').textContent=fmt(G.gold);
+  document.getElementById('magic-big').textContent=fmt(G.magic);
+  document.getElementById('magic-header-val').textContent=fmt(G.magic);
+  document.getElementById('magic-mult').textContent='×'+fmtDec(1+G.magic*0.0001);
+  document.getElementById('hfire-big').textContent=fmt(G.hfire);
+  document.getElementById('hfire-header').textContent=fmt(G.hfire);
+  document.getElementById('bfire-big').textContent=fmt(G.bfire);
+  document.getElementById('bfire-header').textContent=fmt(G.bfire);
+  document.getElementById('fire-big').textContent=fmt(G.fire);
+  document.getElementById('fire-header').textContent=fmt(G.fire);
+  document.getElementById('know-big').textContent=fmt(G.knowledge);
+  document.getElementById('know-header').textContent=fmt(G.knowledge);
+  document.getElementById('know-max').textContent=fmt(G.knowledgeMax);
+  document.getElementById('tomes-big').textContent=fmt(G.tomes);
+  document.getElementById('tomes-total').textContent=fmt(G.tomesTotal);
+  document.getElementById('plague-big').textContent=fmt(G.plague);
+  document.getElementById('spores-big').textContent=fmt(G.spores);
+  document.getElementById('spore-rate').textContent=fmtDec(G.sporeRate);
+  document.getElementById('light-big').textContent=fmt(G.light);
+  document.getElementById('light-rate').textContent=fmtDec(G.lightRate);
+  document.getElementById('dark-big').textContent=fmt(G.dark);
+  document.getElementById('dark-rate').textContent=fmtDec(G.darkRate);
+  document.getElementById('plat-val').textContent=fmt(G.plat);
+  document.getElementById('quant-val').textContent=fmt(G.quant);
+  document.getElementById('plas-val').textContent=fmt(G.plas);
+  document.getElementById('quint-val').textContent=fmt(G.quint);
+  document.getElementById('holyt-val').textContent=fmt(G.holyt);
+  document.getElementById('darkt-val').textContent=fmt(G.darkt);
+  document.getElementById('holyo-val').textContent=fmt(G.holyo);
+  document.getElementById('darko-val').textContent=fmt(G.darko);
+  document.getElementById('holyt-gain').textContent=fmt(Math.max(1,Math.floor(Math.log10(Math.max(1,G.gold)))));
+  document.getElementById('darkt-gain').textContent=fmt(Math.max(1,Math.floor(Math.log10(Math.max(1,G.gold)))));
+  document.getElementById('holyo-gain').textContent=fmt(Math.max(1,Math.floor(Math.log10(Math.max(1,G.holyt)))));
+  document.getElementById('fcube-val').textContent=fmt(G.fcubes);
+  document.getElementById('miner-count').textContent='('+G.miners+')';
+  document.getElementById('dragon-times').innerHTML='You have spent time with your dragon '+G.dragonTimes+' times, increasing gold gain by ×<span id="dragon-mult">'+fmtDec(G.dragonMult)+'</span>!';
+
+  document.getElementById('best-a1').textContent=fmt(G.challengeBests.A1);
+  document.getElementById('best-a2').textContent=fmt(G.challengeBests.A2);
+  document.getElementById('best-b1').textContent=fmt(G.challengeBests.B1);
+  document.getElementById('best-b2').textContent=fmt(G.challengeBests.B2);
+
+  updateSigils();
+  checkLinearUnlocks();
+  if(document.getElementById('tab-achievements').style.display === 'block') {
+    updateAchievementsUI();
+  }
+}
+
+// ── CACHE PROFILES STORAGE ──
+function saveGame(){localStorage.setItem('dd2save',JSON.stringify({G:G}));notify('Game saved!');}
+function loadGame(){
+  const s=localStorage.getItem('dd2save');
+  if(s){
+    const parsed=JSON.parse(s);
+    Object.assign(G,parsed.G);
+    if(!G.unlocks){
+      G.unlocks={magic:false,challenges:false,fire:false,knowledge:false,holy:false,plague:false,essence:false,sigils:false,finality:false};
+    }
+    if(!G.achievements){G.achievements={};}
+    rebuildAll();
+    notify('Game loaded!');
+  }
+}
+
+// ── INITIALIZATION RUNNERS ──
+rebuildAll();
+loadGame();
+setInterval(tick,100);
+setInterval(saveGame,30000);
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='s'){e.preventDefault();saveGame();}});
+</script>
+</body>
+</html>
